@@ -128,7 +128,7 @@ const ViewerPreview = ({
 
   return (
     <Root size={size} scale={scale}>
-      <div ref={containerRef} style={{ ...size, position: 'relative', overflow: 'auto' }}>
+      <div ref={containerRef} style={{ ...size, position: 'relative', overflow: 'visible' }}>
         <Paper
           paperRefs={paperRefs}
           scale={scale}
