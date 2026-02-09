@@ -55,7 +55,6 @@ const Preview = ({
   });
 
   const isForm = Boolean(onChangeInput);
-
   const input = inputs[unitCursor];
   const latestFontRef = useRef(font);
   const latestInputRef = useRef(input);
@@ -152,7 +151,6 @@ const Preview = ({
         const oldValue = (input?.[schema.name] as string) || '';
         if (newValue === oldValue) return;
         handleChangeInput({ name: schema.name, value: newValue });
-        // TODO Improve this to allow schema types to determine whether the execution of getDynamicTemplate is required.
         if (schema.type === 'table') {
           isNeedInit = true;
           newInputValue = newValue;
@@ -166,7 +164,6 @@ const Preview = ({
       }
     });
     if (isNeedInit && newInputValue !== undefined) {
-      // Pass the updated input directly to recalculate with new value
       const updatedInput = { ...input, [schema.name]: newInputValue };
       init(template, updatedInput);
     }

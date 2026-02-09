@@ -2,7 +2,7 @@ import React from 'react';
 import { PreviewProps } from '@pdfme/common';
 import { PreviewUI } from './class.js';
 import { DESTROYED_ERR_MSG } from './constants.js';
-import Preview from './components/Preview.js';
+import ViewerPreview from './components/ViewerPreview.js';
 import AppContextProvider from './components/AppContextProvider.js';
 
 class Viewer extends PreviewUI {
@@ -38,7 +38,7 @@ class Viewer extends PreviewUI {
         plugins={this.getPluginsRegistry()}
         options={this.getOptions()}
       >
-        <Preview
+        <ViewerPreview
           template={this.template}
           size={this.size}
           inputs={this.inputs}
