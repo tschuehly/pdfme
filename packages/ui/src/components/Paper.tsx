@@ -61,8 +61,7 @@ const Paper = (props: {
         let pageTop = paperIndex > 0 ? (rulerHeight + PAGE_GAP) * (paperIndex + 1) : rulerHeight;
 
         if (!hasRulers) {
-          // If no rulers (i.e. Preview/Form) then we'll add an initial gap at the top of the first page
-          pageTop += PAGE_GAP * 2;
+          // No extra gap for Preview/Form — keep content flush
         }
 
         return (
@@ -90,6 +89,10 @@ const Paper = (props: {
               position: 'relative',
               backgroundImage: `url(${background})`,
               backgroundSize: `${paperSize.width}px ${paperSize.height}px`,
+              boxShadow: '4px 4px 16px 4px rgba(0, 0, 0, 0.08)',
+              padding: '1rem',
+              borderRadius: 24,
+              overflow: 'hidden',
               ...paperSize,
             }}
           >

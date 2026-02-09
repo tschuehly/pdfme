@@ -10,9 +10,14 @@ import {
   UIOptions,
   cloneDeep,
 } from '@pdfme/common';
-import { theme as antdTheme } from 'antd';
 import { SELECTABLE_CLASSNAME } from '../constants.js';
-import { PluginsRegistry, OptionsContext, I18nContext, CacheContext } from '../contexts.js';
+import {
+  PluginsRegistry,
+  OptionsContext,
+  I18nContext,
+  CacheContext,
+  defaultThemeToken,
+} from '../contexts.js';
 
 type RendererProps = Omit<
   UIRenderProps<Schema>,
@@ -131,7 +136,7 @@ const Renderer = (props: RendererProps) => {
   const pluginsRegistry = useContext(PluginsRegistry);
   const options = useContext(OptionsContext);
   const i18n = useContext(I18nContext) as (key: string) => string;
-  const { token: theme } = antdTheme.useToken();
+  const theme = defaultThemeToken;
 
   const ref = useRef<HTMLDivElement>(null);
   const _cache = useContext(CacheContext);

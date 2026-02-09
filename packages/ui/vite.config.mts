@@ -23,8 +23,11 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), cssInjectedByJsPlugin()],
     build: {
       lib: {
-        entry: resolve(__dirname, 'src/index.ts'),
-        fileName: 'index',
+        entry: {
+          index: resolve(__dirname, 'src/index.ts'),
+          viewer: resolve(__dirname, 'src/viewerEntry.ts'),
+        },
+        fileName: (_format, entryName) => entryName,
         formats: ['es'],
       },
       minify: false,

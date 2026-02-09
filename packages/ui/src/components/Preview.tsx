@@ -89,7 +89,6 @@ const Preview = ({
   const previousOptionsZoomLevelRef = useRef(options.zoomLevel);
 
   const isForm = Boolean(onChangeInput);
-
   const input = inputs[unitCursor];
   const latestFontRef = useRef(font);
   const latestInputRef = useRef(input);
@@ -231,7 +230,6 @@ const Preview = ({
       }
     }
     if (isNeedInit && newInputValue !== undefined) {
-      // Pass the updated input directly to recalculate with new value
       const updatedInput = { ...input, [schema.name]: newInputValue };
       init(template, updatedInput);
     }
