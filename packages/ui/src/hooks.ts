@@ -21,7 +21,7 @@ import {
   initShortCuts,
   destroyShortCuts,
 } from './helper.js';
-import { RULER_HEIGHT } from './constants.js';
+import { RULER_HEIGHT, PAGE_GAP } from './constants.js';
 
 export const usePrevious = <T>(value: T) => {
   const ref = useRef<T | null>(null);
@@ -81,9 +81,14 @@ export const useUIPreProcessor = ({ template, size, zoomLevel, maxZoom }: UIPreP
       _backgrounds = imgBuffers.map(arrayBufferToBase64);
     }
 
+    // Account for total height of all pages (not just first) so multi-page PDFs fit
+    const totalContentHeight = _pageSizes.reduce((sum, ps, i) => {
+      return sum + ps.height * ZOOM + (i > 0 ? PAGE_GAP : 0);
+    }, 0);
+
     const _scale = Math.min(
       getScale(size.width, paperWidth),
-      getScale(size.height - RULER_HEIGHT, paperHeight),
+      getScale(size.height, totalContentHeight),
     );
 
     return {

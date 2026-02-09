@@ -32,15 +32,28 @@ const Paper = (props: {
     return null;
   }
 
+  // Compute total unscaled content height for proper layout sizing
+  const maxPaperWidth = Math.max(...pageSizes.map(ps => ps.width * ZOOM));
+  const totalPaperHeight = pageSizes.reduce((sum, ps, i) => {
+    const h = ps.height * ZOOM;
+    const top = i > 0 ? (rulerHeight + PAGE_GAP) * (i + 1) : rulerHeight;
+    return Math.max(sum, top + h);
+  }, 0);
+
   return (
+    <div
+      style={{
+        width: maxPaperWidth * scale,
+        height: totalPaperHeight * scale,
+        overflow: 'visible',
+      }}
+    >
     <div
       style={{
         transform: `scale(${scale})`,
         transformOrigin: 'top left',
-        // NOTE: These values do not impact the UI unless they exceed the Paper sizes.
-        // We set them to the scale value to ensure the container is redrawn when you zoom in/out.
-        height: scale,
-        width: scale,
+        width: maxPaperWidth,
+        height: totalPaperHeight,
       }}
     >
       {backgrounds.map((background, paperIndex) => {
@@ -113,6 +126,7 @@ const Paper = (props: {
           </div>
         );
       })}
+    </div>
     </div>
   );
 };
