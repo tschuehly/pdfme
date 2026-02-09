@@ -1,4 +1,3 @@
-import hotkeysJs from 'hotkeys-js';
 import { useContext } from 'react';
 import {
   cloneDeep,
@@ -16,30 +15,34 @@ import { pdf2size } from '@pdfme/converter';
 import { DEFAULT_MAX_ZOOM, RULER_HEIGHT } from './constants.js';
 import { OptionsContext } from './contexts.js';
 
-// Define a type for the hotkeys function with additional properties
+// Lazy-loaded hotkeys — only imported when Designer actually calls initShortCuts
 type HotkeysFunction = {
   (keys: string, callback: (e: KeyboardEvent, handler: { shortcut: string }) => void): unknown;
   shift: boolean;
   unbind: (keys: string) => void;
 };
 
-// Create a simple mock for hotkeys to avoid TypeScript errors
-const hotkeys = function (
-  keys: string,
-  callback: (e: KeyboardEvent, handler: { shortcut: string }) => void,
-) {
-  return hotkeysJs(keys, callback);
-} as HotkeysFunction;
+let hotkeys: HotkeysFunction | null = null;
 
-// Add properties to the hotkeys function
-hotkeys.shift = false;
-hotkeys.unbind = function (keys: string) {
-  // Do nothing if hotkeysJs doesn't have unbind
-  const hotkeysFn = hotkeysJs as unknown as { unbind?: (keys: string) => void };
-  if (typeof hotkeysFn.unbind === 'function') {
-    hotkeysFn.unbind(keys);
-  }
-};
+async function getHotkeys(): Promise<HotkeysFunction> {
+  if (hotkeys) return hotkeys;
+  const { default: hotkeysJs } = await import('hotkeys-js');
+  const fn = function (
+    keys: string,
+    callback: (e: KeyboardEvent, handler: { shortcut: string }) => void,
+  ) {
+    return hotkeysJs(keys, callback);
+  } as HotkeysFunction;
+  fn.shift = false;
+  fn.unbind = function (keys: string) {
+    const hotkeysFn = hotkeysJs as unknown as { unbind?: (keys: string) => void };
+    if (typeof hotkeysFn.unbind === 'function') {
+      hotkeysFn.unbind(keys);
+    }
+  };
+  hotkeys = fn;
+  return fn;
+}
 
 export const uuid = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -139,7 +142,7 @@ const keys = [
   selectAllMac,
 ];
 
-export const initShortCuts = (arg: {
+export const initShortCuts = async (arg: {
   move: (command: 'up' | 'down' | 'left' | 'right', isShift: boolean) => void;
   remove: () => void;
   esc: () => void;
@@ -150,27 +153,28 @@ export const initShortCuts = (arg: {
   save: () => void;
   selectAll: () => void;
 }) => {
-  hotkeys(keys.join(), (e: KeyboardEvent, handler: { shortcut: string }) => {
+  const hk = await getHotkeys();
+  hk(keys.join(), (e: KeyboardEvent, handler: { shortcut: string }) => {
     switch (handler.shortcut) {
       case up:
       case shiftUp:
         e.preventDefault();
-        arg.move('up', hotkeys.shift);
+        arg.move('up', hk.shift);
         break;
       case down:
       case shiftDown:
         e.preventDefault();
-        arg.move('down', hotkeys.shift);
+        arg.move('down', hk.shift);
         break;
       case left:
       case shiftLeft:
         e.preventDefault();
-        arg.move('left', hotkeys.shift);
+        arg.move('left', hk.shift);
         break;
       case right:
       case shiftRight:
         e.preventDefault();
-        arg.move('right', hotkeys.shift);
+        arg.move('right', hk.shift);
         break;
       case rmWin:
       case rmMac:
@@ -211,8 +215,9 @@ export const initShortCuts = (arg: {
   });
 };
 
-export const destroyShortCuts = () => {
-  hotkeys.unbind(keys.join());
+export const destroyShortCuts = async () => {
+  const hk = await getHotkeys();
+  hk.unbind(keys.join());
 };
 
 /**

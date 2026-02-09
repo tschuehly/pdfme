@@ -1,9 +1,8 @@
 import React from 'react';
-import { LoaderCircle } from 'lucide-react';
-import { theme } from 'antd';
+import { defaultThemeToken } from '../contexts.js';
 
 const Spinner: React.FC = () => {
-  const { token } = theme.useToken();
+  const token = defaultThemeToken;
 
   const containerStyle: React.CSSProperties = {
     position: 'relative',
@@ -19,16 +18,14 @@ const Spinner: React.FC = () => {
 
   const loaderStyle: React.CSSProperties = {
     animation: 'spin 1s linear infinite',
+    width: 50,
+    height: 50,
   };
 
   const keyframes = `
     @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   `;
 
@@ -36,7 +33,9 @@ const Spinner: React.FC = () => {
     <>
       <style>{keyframes}</style>
       <div style={containerStyle}>
-        <LoaderCircle size={50} style={loaderStyle} />
+        <svg style={loaderStyle} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+        </svg>
       </div>
     </>
   );

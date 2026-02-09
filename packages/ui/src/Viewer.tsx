@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { render as reactDomRender } from 'react-dom';
 import { PreviewProps } from '@pdfme/common';
 import { PreviewUI } from './class.js';
 import { DESTROYED_ERR_MSG } from './constants.js';
@@ -9,13 +9,6 @@ import AppContextProvider from './components/AppContextProvider.js';
 class Viewer extends PreviewUI {
   private onPageChangeCallback?: (pageInfo: { currentPage: number; totalPages: number }) => void;
   private pageCursor: number = 0;
-
-  constructor(props: PreviewProps) {
-    super(props);
-    console.warn(
-      '[@pdfme/ui] Viewer component is deprecated and will be removed in a future version.',
-    );
-  }
 
   public onPageChange(cb: (pageInfo: { currentPage: number; totalPages: number }) => void) {
     this.onPageChangeCallback = cb;
@@ -32,7 +25,7 @@ class Viewer extends PreviewUI {
 
   protected render() {
     if (!this.domContainer) throw Error(DESTROYED_ERR_MSG);
-    ReactDOM.render(
+    reactDomRender(
       <AppContextProvider
         lang={this.getLang()}
         font={this.getFont()}
@@ -43,6 +36,7 @@ class Viewer extends PreviewUI {
           template={this.template}
           size={this.size}
           inputs={this.inputs}
+          showControls={false}
           onPageChange={(pageInfo) => {
             this.pageCursor = pageInfo.currentPage;
             if (this.onPageChangeCallback) {

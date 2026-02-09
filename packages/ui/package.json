@@ -24,11 +24,22 @@
   "main": "dist/index.umd.js",
   "module": "dist/index.es.js",
   "types": "dist/types/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/src/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js"
+    },
+    "./viewer": {
+      "types": "./dist/types/src/viewerEntry.d.ts",
+      "import": "./dist/viewer.es.js"
+    }
+  },
   "scripts": {
     "dev": "run-p devBuild:watch devBuildType:watch",
     "devBuild:watch": "esbuild src/index.ts --bundle --outfile=dist/index.es.js --format=esm --watch",
     "devBuildType:watch": "tsc --emitDeclarationOnly --watch",
-    "build": "vite build && tsc --emitDeclarationOnly",
+    "build": "vite build && BUILD_UMD=true vite build && tsc --emitDeclarationOnly",
     "clean": "rimraf dist",
     "lint": "eslint --ext .ts,.tsx src --config eslint.config.mjs",
     "test": "jest",
