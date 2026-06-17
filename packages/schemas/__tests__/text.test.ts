@@ -9,6 +9,7 @@ import {
   getFontDescentInPt,
   getFontKitFont,
   getSplittedLines,
+  splitTextToSize,
   filterStartJP,
   filterEndJP,
 } from '../src/text/helper.js';
@@ -62,6 +63,14 @@ describe('getSplitPosition test with mocked font width calculations', () => {
     characterSpacing: 0,
     boxWidthInPt: 5,
   };
+  const splitText = (value: string, boxWidthInPt: number) =>
+    splitTextToSize({
+      value,
+      characterSpacing: 0,
+      fontSize: 12,
+      fontKitFont: mockedFont,
+      boxWidthInPt,
+    });
 
   it('does not split an empty string', () => {
     expect(getSplittedLines('', mockCalcValues)).toEqual(['']);
@@ -100,6 +109,15 @@ describe('getSplitPosition test with mocked font width calculations', () => {
 
   it('splits a line with lots of words', () => {
     expect(getSplittedLines('a b c d e', mockCalcValues)).toEqual(['a b c', 'd e']);
+  });
+
+  it('keeps trailing punctuation with the preceding word when wrapping', () => {
+    expect(splitText('A Motto:', 7)).toEqual(['A', 'Motto:\n']);
+    expect(splitText('A Hello!', 7)).toEqual(['A', 'Hello!\n']);
+  });
+
+  it('keeps quoted words together when wrapping', () => {
+    expect(splitText('A "word"', 7)).toEqual(['A', '"word"\n']);
   });
 });
 
