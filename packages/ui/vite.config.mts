@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => {
           index: resolve(__dirname, 'src/index.ts'),
           viewer: resolve(__dirname, 'src/viewerEntry.ts'),
         },
-        fileName: (_format, entryName) => entryName,
+        fileName: (_format, entryName) => `${entryName}.js`,
         formats: ['es'],
       },
       minify: false,
