@@ -444,6 +444,88 @@ const getWordSegmenter = () => {
   return wordSegmenter;
 };
 
+type LineBreakSegment = {
+  segment: string;
+  isWordLike?: boolean;
+};
+
+const NON_BREAKING_TRAILING_PUNCTUATION = new Set([
+  '.',
+  ',',
+  ':',
+  ';',
+  '!',
+  '?',
+  '/',
+  '\\',
+  "'",
+  '"',
+  ')',
+  ']',
+  '}',
+  '>',
+  '»',
+  '”',
+  '’',
+  '。',
+  '、',
+  '，',
+  '．',
+  '：',
+  '；',
+  '！',
+  '？',
+]);
+
+const NON_BREAKING_LEADING_PUNCTUATION = new Set(["'", '"', '(', '[', '{', '<', '«', '“', '‘']);
+
+const isWhitespaceSegment = (segment: string) => segment.trim() === '';
+
+const coalesceLineBreakSegments = (segments: Iterable<LineBreakSegment>): LineBreakSegment[] => {
+  const coalesced: LineBreakSegment[] = [];
+  let pendingPrefix = '';
+
+  for (const part of segments) {
+    let segment = part.segment;
+
+    if (isWhitespaceSegment(segment)) {
+      if (pendingPrefix) {
+        coalesced.push({ ...part, segment: pendingPrefix, isWordLike: false });
+        pendingPrefix = '';
+      }
+      coalesced.push(part);
+      continue;
+    }
+
+    if (!part.isWordLike) {
+      const previous = coalesced[coalesced.length - 1];
+      if (
+        previous &&
+        !isWhitespaceSegment(previous.segment) &&
+        (NON_BREAKING_TRAILING_PUNCTUATION.has(segment) ||
+          !NON_BREAKING_LEADING_PUNCTUATION.has(segment))
+      ) {
+        previous.segment += segment;
+      } else {
+        pendingPrefix += segment;
+      }
+      continue;
+    }
+
+    if (pendingPrefix) {
+      segment = pendingPrefix + segment;
+      pendingPrefix = '';
+    }
+    coalesced.push({ ...part, segment });
+  }
+
+  if (pendingPrefix) {
+    coalesced.push({ segment: pendingPrefix, isWordLike: false });
+  }
+
+  return coalesced;
+};
+
 const getSplittedLinesBySegmenter = (line: string, calcValues: FontWidthCalcValues): string[] => {
   // nothing to process but need to keep this for new lines.
   if (line.trim() === '') {
@@ -452,7 +534,7 @@ const getSplittedLinesBySegmenter = (line: string, calcValues: FontWidthCalcValu
 
   const { font, fontSize, characterSpacing, boxWidthInPt } = calcValues;
   const segmenter = getWordSegmenter();
-  const iterator = segmenter.segment(line.trimEnd())[Symbol.iterator]();
+  const iterator = coalesceLineBreakSegments(segmenter.segment(line.trimEnd()))[Symbol.iterator]();
 
   let lines: string[] = [];
   let lineCounter: number = 0;
