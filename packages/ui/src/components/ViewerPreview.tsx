@@ -113,6 +113,7 @@ const ViewerPreview = ({
 
   useScrollPageCursor({
     ref: containerRef,
+    paperRefs,
     pageSizes,
     scale,
     pageCursor,
