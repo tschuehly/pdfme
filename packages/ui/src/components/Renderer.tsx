@@ -72,7 +72,7 @@ const Wrapper = ({
   isActive = false,
   selectable = true,
 }: RendererProps & { children: ReactNode }) => {
-  const { token } = antdTheme.useToken();
+  const token = defaultThemeToken;
   const isFormEditable = mode === 'form' && !schema.readOnly;
   const activateSchema = () => {
     if (isFormEditable) onChangeActiveSchemaId?.(schema.id);
