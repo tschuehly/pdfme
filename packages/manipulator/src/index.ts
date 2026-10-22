@@ -27,7 +27,13 @@ const split = async (
   const result: Uint8Array[] = [];
 
   for (const { start = 0, end = numPages - 1 } of ranges) {
-    if (start < 0 || end >= numPages || start > end) {
+    if (
+      !Number.isInteger(start) ||
+      !Number.isInteger(end) ||
+      start < 0 ||
+      end >= numPages ||
+      start > end
+    ) {
       throw new Error(
         `[@pdfme/manipulator] Invalid range: start=${start}, end=${end}, total pages=${numPages}`,
       );
@@ -52,7 +58,7 @@ const remove = async (pdf: ArrayBuffer | Uint8Array, pages: number[]): Promise<U
   const pdfDoc = await PDFDocument.load(pdf);
   const numPages = pdfDoc.getPageCount();
 
-  if (pages.some((page) => page < 0 || page >= numPages)) {
+  if (pages.some((page) => !Number.isInteger(page) || page < 0 || page >= numPages)) {
     throw new Error(
       `[@pdfme/manipulator] Invalid page number: pages must be between 0 and ${numPages - 1}`,
     );
@@ -79,7 +85,7 @@ const insert = async (
     const insertDoc = await PDFDocument.load(pdf);
     const numPages = basePdfDoc.getPageCount();
 
-    if (actualPos < 0 || actualPos > numPages) {
+    if (!Number.isInteger(position) || actualPos < 0 || actualPos > numPages) {
       throw new Error(`[@pdfme/manipulator] Invalid position: must be between 0 and ${numPages}`);
     }
 
@@ -136,7 +142,7 @@ const rotate = async (
   }
 
   if (pageNumbers) {
-    if (pageNumbers.some((page) => page < 0 || page >= pages.length)) {
+    if (pageNumbers.some((page) => !Number.isInteger(page) || page < 0 || page >= pages.length)) {
       throw new Error(
         `[@pdfme/manipulator] Invalid page number: pages must be between 0 and ${pages.length - 1}`,
       );
@@ -164,7 +170,14 @@ const move = async (
   const pdfDoc = await PDFDocument.load(pdf);
   const currentPageCount = pdfDoc.getPageCount();
 
-  if (from < 0 || from >= currentPageCount || to < 0 || to >= currentPageCount) {
+  if (
+    !Number.isInteger(from) ||
+    !Number.isInteger(to) ||
+    from < 0 ||
+    from >= currentPageCount ||
+    to < 0 ||
+    to >= currentPageCount
+  ) {
     throw new Error(
       `[@pdfme/manipulator] Invalid page number: from=${from}, to=${to}, total pages=${currentPageCount}`,
     );
