@@ -1,7 +1,42 @@
+import { PDFDocument } from '@pdfme/pdf-lib';
 import { organize } from '../src/index';
 import { createTestPDF, getPDFPageCount } from './test-helpers';
 
+const identityPdf = async (count: number, firstWidth = 100) => {
+  const doc = await PDFDocument.create();
+  for (let i = 0; i < count; i++) doc.addPage([firstWidth + i, 200]);
+  return doc.save();
+};
+
+const order = async (pdf: Uint8Array) =>
+  (await PDFDocument.load(pdf)).getPages().map((page) => page.getWidth() - 100);
+
 describe('organize', () => {
+  test('moves against the state after a preceding removal', async () => {
+    const result = await organize(await identityPdf(5), [
+      { type: 'remove', data: { position: 0 } },
+      { type: 'move', data: { from: 0, to: 3 } },
+    ]);
+    expect(await order(result)).toEqual([2, 3, 4, 1]);
+  });
+
+  test('composes insert, insert, forward move and backward move', async () => {
+    const result = await organize(await identityPdf(5), [
+      { type: 'insert', data: { pdf: await identityPdf(1, 200), position: 5 } },
+      { type: 'insert', data: { pdf: await identityPdf(1, 201), position: 0 } },
+      { type: 'move', data: { from: 2, to: 5 } },
+      { type: 'move', data: { from: 3, to: 1 } },
+    ]);
+    expect(await order(result)).toEqual([101, 3, 0, 2, 4, 1, 100]);
+  });
+
+  test('preserves backward-only moves', async () => {
+    const result = await organize(await identityPdf(5), [
+      { type: 'move', data: { from: 4, to: 1 } },
+    ]);
+    expect(await order(result)).toEqual([0, 4, 1, 2, 3]);
+  });
+
   test('performs single remove operation', async () => {
     const pdf = await createTestPDF(5);
     const result = await organize(pdf, [

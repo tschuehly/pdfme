@@ -1,4 +1,4 @@
-import { PDFDocument, RotationTypes } from '@pdfme/pdf-lib';
+import { PDFDocument, PDFName, PDFPageLeaf, RotationTypes } from '@pdfme/pdf-lib';
 
 const merge = async (pdfs: (ArrayBuffer | Uint8Array)[]): Promise<Uint8Array> => {
   if (!pdfs.length) {
@@ -175,10 +175,19 @@ const move = async (
   }
 
   const page = pdfDoc.getPage(from);
+  // Reparenting changes inheritance, so pin the page's effective values.
+  const node = page.node;
+  for (const key of PDFPageLeaf.InheritableEntries) {
+    const name = PDFName.of(key);
+    const value = node.getInheritableAttribute(name);
+    if (!node.get(name) && value) node.set(name, value);
+  }
+  const mediaBox = node.get(PDFName.MediaBox);
+  if (!node.get(PDFName.CropBox) && mediaBox) node.set(PDFName.CropBox, mediaBox);
+  if (!node.get(PDFName.of('Rotate'))) page.setRotation({ type: RotationTypes.Degrees, angle: 0 });
   pdfDoc.removePage(from);
 
-  const adjustedTo = from < to ? to - 1 : to;
-  pdfDoc.insertPage(adjustedTo, page);
+  pdfDoc.insertPage(to, page);
 
   return pdfDoc.save();
 };
